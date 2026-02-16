@@ -1,0 +1,44 @@
+version: 2
+
+project_name: n8n-cli
+
+changelog:
+  disable: true
+
+builds:
+  - id: n8n
+    main: ./cmd/n8n
+    binary: n8n-cli
+    ldflags: >-
+      -s -w
+      -X github.com/builtbyrobben/n8n-cli/internal/cmd.version={{ .Tag }}
+      -X github.com/builtbyrobben/n8n-cli/internal/cmd.commit={{ .ShortCommit }}
+      -X github.com/builtbyrobben/n8n-cli/internal/cmd.date={{ .Date }}
+    env:
+      - CGO_ENABLED=0
+    targets:
+      - linux_amd64
+      - linux_arm64
+  - id: n8n_darwin
+    main: ./cmd/n8n
+    binary: n8n-cli
+    ldflags: >-
+      -s -w
+      -X github.com/builtbyrobben/n8n-cli/internal/cmd.version={{ .Tag }}
+      -X github.com/builtbyrobben/n8n-cli/internal/cmd.commit={{ .ShortCommit }}
+      -X github.com/builtbyrobben/n8n-cli/internal/cmd.date={{ .Date }}
+    env:
+      - CGO_ENABLED=1
+    targets:
+      - darwin_amd64
+      - darwin_arm64
+
+archives:
+  - builds:
+      - n8n
+      - n8n_darwin
+    format: tar.gz
+    name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+
+checksum:
+  name_template: checksums.txt
