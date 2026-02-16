@@ -21,8 +21,15 @@ func getN8NClient() (*n8n.Client, error) {
 		return nil, fmt.Errorf("open credential store: %w", err)
 	}
 
-	key, _ := store.GetAPIKey()
-	url, _ := store.GetAPIURL()
+	key, err := store.GetAPIKey()
+	if err != nil {
+		return nil, fmt.Errorf("read API key: %w", err)
+	}
+
+	url, err := store.GetAPIURL()
+	if err != nil {
+		return nil, fmt.Errorf("read API URL: %w", err)
+	}
 
 	if key == "" || url == "" {
 		return nil, fmt.Errorf("no credentials found; run: n8n-cli auth set-key --url <url>")
