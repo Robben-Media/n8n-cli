@@ -33,7 +33,7 @@ func (cmd *WebhooksTriggerCmd) Run(ctx context.Context) error {
 		}
 	}
 
-	result, err := client.TriggerWebhook(ctx, cmd.Path, data)
+	result, err := client.TriggerWebhook(ctx, cmd.Path, cmd.Method, data)
 	if err != nil {
 		return err
 	}

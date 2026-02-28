@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"net/url"
 	"strconv"
+	"strings"
 
 	"github.com/builtbyrobben/n8n-cli/internal/api"
 )
@@ -241,14 +242,35 @@ func (c *Client) DeleteVariable(ctx context.Context, id string) error {
 
 // --- Webhooks ---
 
-func (c *Client) TriggerWebhook(ctx context.Context, path string, data any) (any, error) {
+func (c *Client) TriggerWebhook(ctx context.Context, path, method string, data any) (any, error) {
 	webhookURL := c.rawBaseURL + "/webhook/" + path
 
 	var result any
 
 	webhookClient := api.NewClient(webhookURL)
+	httpMethod := strings.ToUpper(strings.TrimSpace(method))
+	if httpMethod == "" {
+		httpMethod = http.MethodPost
+	}
 
-	if err := webhookClient.Post(ctx, "", data, &result); err != nil {
+	var err error
+
+	switch httpMethod {
+	case http.MethodGet:
+		err = webhookClient.Get(ctx, "", nil, &result)
+	case http.MethodPost:
+		err = webhookClient.Post(ctx, "", data, &result)
+	case http.MethodPut:
+		err = webhookClient.Put(ctx, "", data, &result)
+	case http.MethodPatch:
+		err = webhookClient.Patch(ctx, "", data, &result)
+	case http.MethodDelete:
+		err = webhookClient.Delete(ctx, "", &result)
+	default:
+		return nil, fmt.Errorf("unsupported webhook method: %s", httpMethod)
+	}
+
+	if err != nil {
 		return nil, fmt.Errorf("trigger webhook: %w", err)
 	}
 
