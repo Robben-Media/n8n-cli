@@ -2,6 +2,7 @@ package n8n
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -10,6 +11,8 @@ import (
 
 	"github.com/builtbyrobben/n8n-cli/internal/api"
 )
+
+var errUnsupportedWebhookMethod = errors.New("unsupported webhook method")
 
 type Client struct {
 	api        *api.Client
@@ -249,6 +252,7 @@ func (c *Client) TriggerWebhook(ctx context.Context, path, method string, data a
 
 	webhookClient := api.NewClient(webhookURL)
 	httpMethod := strings.ToUpper(strings.TrimSpace(method))
+
 	if httpMethod == "" {
 		httpMethod = http.MethodPost
 	}
@@ -267,7 +271,7 @@ func (c *Client) TriggerWebhook(ctx context.Context, path, method string, data a
 	case http.MethodDelete:
 		err = webhookClient.Delete(ctx, "", &result)
 	default:
-		return nil, fmt.Errorf("unsupported webhook method: %s", httpMethod)
+		return nil, fmt.Errorf("%w: %s", errUnsupportedWebhookMethod, httpMethod)
 	}
 
 	if err != nil {
