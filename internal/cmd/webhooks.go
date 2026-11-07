@@ -28,7 +28,7 @@ func (cmd *WebhooksTriggerCmd) Run(ctx context.Context) error {
 	var data any
 
 	if cmd.Data != "" {
-		if err := json.Unmarshal([]byte(cmd.Data), &data); err != nil {
+		if err = json.Unmarshal([]byte(cmd.Data), &data); err != nil {
 			return fmt.Errorf("parse data JSON: %w", err)
 		}
 	}
